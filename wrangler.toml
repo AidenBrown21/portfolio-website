@@ -1,5 +1,5 @@
-name = "portfolio-website"
-compatibility_date = "2025-01-01"
+name = "portfolio"
+compatibility_date = "2024-01-01"
 
 [site]
 bucket = "./out"
