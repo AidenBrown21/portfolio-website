@@ -21,7 +21,7 @@ const projects: Project[] = [
     title: 'HyperFit (IOS)',
     description: 'A SwiftUI-based iOS application that generates personalized workout plans and tracks fitness progress. Built to solve the common problem of workout routine repetition and lack of exercise variety with dynamic workout generation, intelligent exercise selection, and local workout history tracking.',
     technologies: ['SwiftUI', 'Firebase', 'SwiftData', 'Wger API', 'iOS'],
-    githubUrl: undefined,
+    githubUrl: 'https://github.com/AidenBrown21/Hyperfit',
     liveUrl: undefined,
     image: 'bg-gradient-to-br from-yellow-500 to-orange-600',
     projectImages: [
@@ -39,7 +39,7 @@ const projects: Project[] = [
     title: 'ATLAS Scam Protection',
     description: 'A comprehensive anti-scam detection tool that analyzes potentially malicious content with multi-format analysis (text, speech, images) to identify threats in real-time. Features a responsive React frontend, REST API backend with Flask, and machine learning models for threat detection.',
     technologies: ['React', 'Python', 'Flask', 'MongoDB', 'Scikit-learn', 'NLTK', 'Tesseract'],
-    githubUrl: undefined,
+    githubUrl: 'https://www.github.com/inthezone006/atlas',
     liveUrl: 'https://www.atlasprotection.app',
     image: 'bg-gradient-to-br from-orange-500 to-red-600',
     projectImages: [
