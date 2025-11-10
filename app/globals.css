@@ -2,7 +2,7 @@
 
 :root {
   --background: #ffffff;
-  --foreground: #171717;
+  --foreground: #1f2937;
 }
 
 @theme inline {
@@ -14,13 +14,13 @@
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --background: #ffffff;
+    --foreground: #1f2937;
   }
 }
 
 body {
-  background: linear-gradient(to bottom, #000000, #1a1a1a, #2d2d2d, #1a1a1a, #000000);
+  background: linear-gradient(to bottom, #f3f4f6, #e5e7eb, #ffffff, #e5e7eb, #f3f4f6);
   background-attachment: fixed;
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;

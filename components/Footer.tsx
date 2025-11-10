@@ -2,10 +2,10 @@ export default function Footer() {
   const currentYear = new Date().getFullYear();
 
   return (
-    <footer className="py-8 border-t border-gray-800">
+    <footer className="py-8 border-t border-gray-300">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex flex-col md:flex-row justify-between items-center gap-4">
-          <p className="text-gray-400 text-sm">
+          <p className="text-gray-600 text-sm">
             © {currentYear} Aiden Brown. All rights reserved.
           </p>
 
@@ -14,7 +14,7 @@ export default function Footer() {
               href="https://github.com/aidenbrown21"
               target="_blank"
               rel="noopener noreferrer"
-              className="text-gray-400 hover:text-orange-400 transition-colors"
+              className="text-gray-600 hover:text-blue-600 transition-colors"
               aria-label="GitHub"
             >
               <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
@@ -26,7 +26,7 @@ export default function Footer() {
               href="https://linkedin.com/in/aidenbrown21"
               target="_blank"
               rel="noopener noreferrer"
-              className="text-gray-400 hover:text-orange-400 transition-colors"
+              className="text-gray-600 hover:text-blue-600 transition-colors"
               aria-label="LinkedIn"
             >
               <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
@@ -36,7 +36,7 @@ export default function Footer() {
 
             <a
               href="mailto:brow2423@purdue.edu"
-              className="text-gray-400 hover:text-orange-400 transition-colors"
+              className="text-gray-600 hover:text-blue-600 transition-colors"
               aria-label="Email"
             >
               <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">

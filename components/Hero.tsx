@@ -7,7 +7,7 @@ export default function Hero() {
         <div className="space-y-8">
           {/* Profile Image */}
           <div className="flex justify-center">
-            <div className="w-32 h-32 rounded-full overflow-hidden border-4 border-gradient-to-r from-yellow-500 via-orange-500 to-orange-600 ring-4 ring-orange-500/30">
+            <div className="w-32 h-32 rounded-full overflow-hidden border-4 border-gradient-to-r from-sky-400 via-blue-500 to-blue-700 ring-4 ring-blue-500/30">
               <Image
                 src="/Aiden Brown.jpg"
                 alt="Aiden Brown"
@@ -21,19 +21,19 @@ export default function Hero() {
 
           {/* Main Heading */}
           <div className="space-y-4">
-            <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold text-white">
+            <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold text-gray-900">
               Hi, I'm{' '}
-              <span className="bg-gradient-to-r from-yellow-400 via-orange-500 to-orange-600 bg-clip-text text-transparent">
+              <span className="bg-gradient-to-r from-sky-400 via-blue-600 to-blue-800 bg-clip-text text-transparent">
                 Aiden Brown
               </span>
             </h1>
-            <p className="text-xl sm:text-2xl text-gray-300">
+            <p className="text-xl sm:text-2xl text-gray-700">
               Full Stack Developer & Designer
             </p>
           </div>
 
           {/* Description */}
-          <p className="max-w-2xl mx-auto text-lg text-gray-400">
+          <p className="max-w-2xl mx-auto text-lg text-gray-600">
             Pursuing a Bachelor of Science in Computer Science at Purdue University, expected to graduate in May 2027.
             Focused on Front-end Development and IOS applications. Currently looking for an internship for Summer 2026.
           </p>
@@ -42,13 +42,13 @@ export default function Hero() {
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
             <a
               href="#projects"
-              className="px-8 py-3 bg-gradient-to-r from-yellow-500 to-orange-600 text-white rounded-lg hover:from-yellow-600 hover:to-orange-700 transition-all font-medium w-full sm:w-auto"
+              className="px-8 py-3 bg-gradient-to-r from-sky-500 to-blue-700 text-white rounded-lg hover:from-sky-600 hover:to-blue-800 transition-all font-medium w-full sm:w-auto"
             >
               View My Work
             </a>
             <a
               href="#contact"
-              className="px-8 py-3 border-2 border-gray-600 text-gray-300 rounded-lg hover:border-orange-500 hover:text-orange-400 transition-colors font-medium w-full sm:w-auto"
+              className="px-8 py-3 border-2 border-gray-400 text-gray-700 rounded-lg hover:border-blue-600 hover:text-blue-700 transition-colors font-medium w-full sm:w-auto"
             >
               Get In Touch
             </a>
@@ -56,12 +56,12 @@ export default function Hero() {
 
           {/* Tech Stack */}
           <div className="pt-12">
-            <p className="text-sm text-gray-400 mb-4">TECH STACK</p>
+            <p className="text-sm text-gray-500 mb-4">TECH STACK</p>
             <div className="flex flex-wrap justify-center gap-4">
               {['React', 'Next.js', 'Tailwind CSS', 'TypeScript', 'Swift', 'Python'].map((tech) => (
                 <span
                   key={tech}
-                  className="px-4 py-2 bg-white/10 backdrop-blur-sm text-gray-200 rounded-full text-sm font-medium border border-gray-700"
+                  className="px-4 py-2 bg-white/80 backdrop-blur-sm text-gray-700 rounded-full text-sm font-medium border border-gray-300"
                 >
                   {tech}
                 </span>

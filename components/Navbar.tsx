@@ -7,7 +7,7 @@ export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
 
   return (
-    <nav className="fixed w-full bg-black/30 backdrop-blur-md z-50">
+    <nav className="fixed w-full bg-white/70 backdrop-blur-md z-50 border-b border-gray-200">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           {/* Social Links */}
@@ -16,7 +16,7 @@ export default function Navbar() {
               href="https://github.com/AidenBrown21"
               target="_blank"
               rel="noopener noreferrer"
-              className="text-gray-300 hover:text-orange-400 transition-colors"
+              className="text-gray-600 hover:text-blue-600 transition-colors"
               aria-label="GitHub"
             >
               <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
@@ -27,7 +27,7 @@ export default function Navbar() {
               href="https://linkedin.com/in/aidenbrown21"
               target="_blank"
               rel="noopener noreferrer"
-              className="text-gray-300 hover:text-orange-400 transition-colors"
+              className="text-gray-600 hover:text-blue-600 transition-colors"
               aria-label="LinkedIn"
             >
               <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
@@ -38,13 +38,13 @@ export default function Navbar() {
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex space-x-8">
-            <Link href="#about" className="text-gray-300 hover:text-orange-400 transition-colors">
+            <Link href="#about" className="text-gray-700 hover:text-blue-600 transition-colors">
               About
             </Link>
-            <Link href="#projects" className="text-gray-300 hover:text-orange-400 transition-colors">
+            <Link href="#projects" className="text-gray-700 hover:text-blue-600 transition-colors">
               Projects
             </Link>
-            <Link href="#contact" className="text-gray-300 hover:text-orange-400 transition-colors">
+            <Link href="#contact" className="text-gray-700 hover:text-blue-600 transition-colors">
               Contact
             </Link>
           </div>
@@ -52,7 +52,7 @@ export default function Navbar() {
           {/* Mobile menu button */}
           <button
             onClick={() => setIsOpen(!isOpen)}
-            className="md:hidden text-gray-300"
+            className="md:hidden text-gray-700"
           >
             <svg className="h-6 w-6" fill="none" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" viewBox="0 0 24 24" stroke="currentColor">
               {isOpen ? (
@@ -68,14 +68,14 @@ export default function Navbar() {
       {/* Mobile Navigation */}
       {isOpen && (
         <div className="md:hidden">
-          <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3 bg-black/50 backdrop-blur-md">
-            <Link href="#about" className="block px-3 py-2 text-gray-300 hover:text-orange-400">
+          <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3 bg-white/90 backdrop-blur-md border-t border-gray-200">
+            <Link href="#about" className="block px-3 py-2 text-gray-700 hover:text-blue-600">
               About
             </Link>
-            <Link href="#projects" className="block px-3 py-2 text-gray-300 hover:text-orange-400">
+            <Link href="#projects" className="block px-3 py-2 text-gray-700 hover:text-blue-600">
               Projects
             </Link>
-            <Link href="#contact" className="block px-3 py-2 text-gray-300 hover:text-orange-400">
+            <Link href="#contact" className="block px-3 py-2 text-gray-700 hover:text-blue-600">
               Contact
             </Link>
           </div>
