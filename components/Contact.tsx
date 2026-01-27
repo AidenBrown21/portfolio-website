@@ -53,127 +53,113 @@ export default function Contact() {
 
   return (
     <section id="contact" className="min-h-screen py-20 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-4xl mx-auto">
-        {/* Section Header */}
-        <div className="text-center mb-16">
-          <h2 className="text-4xl sm:text-5xl font-bold text-gray-900 mb-4">
-            Get In Touch
-          </h2>
-          <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-            Have a project in mind or want to collaborate? Feel free to reach out!
-          </p>
-        </div>
+      <div className="max-w-5xl mx-auto">
+        <div className="border-2 border-black p-6 sm:p-10 bg-[#f9f4ec]">
+          {/* Section Header */}
+          <div className="text-left mb-12">
+            <p className="text-xs uppercase font-bold tracking-[0.2em]">Contact</p>
+            <h2 className="text-3xl sm:text-4xl font-black text-black mt-3">
+              Get In Touch
+            </h2>
+            <p className="text-base sm:text-lg font-medium mt-4">
+              Have a project in mind or want to collaborate? Feel free to reach out!
+            </p>
+          </div>
 
-        <div className="grid md:grid-cols-2 gap-12">
-          {/* Contact Information */}
-          <div className="space-y-8">
-            <div>
-              <h3 className="text-2xl font-bold text-gray-900 mb-6">
-                Contact Information
-              </h3>
-              <div className="space-y-4">
-                <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center border border-blue-300">
-                    <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                    </svg>
-                  </div>
+          <div className="grid md:grid-cols-2 gap-10">
+            {/* Contact Information */}
+            <div className="space-y-8">
+              <div>
+                <h3 className="text-xl font-black mb-6">Contact Information</h3>
+                <div className="space-y-4 text-sm font-bold">
                   <div>
-                    <p className="text-sm text-gray-600">Email</p>
-                    <a href="mailto:brow2423@purdue.edu" className="text-gray-900 hover:text-blue-600">
+                    <p className="uppercase tracking-wide">Email</p>
+                    <a href="mailto:brow2423@purdue.edu" className="underline underline-offset-4 hover:no-underline">
                       brow2423@purdue.edu
                     </a>
                   </div>
-                </div>
-
-                <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center border border-blue-300">
-                    <svg className="w-6 h-6 text-blue-600" fill="currentColor" viewBox="0 0 24 24">
-                      <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
-                    </svg>
-                  </div>
                   <div>
-                    <p className="text-sm text-gray-600">LinkedIn</p>
-                    <a href="https://linkedin.com/in/aidenbrown21" target="_blank" rel="noopener noreferrer" className="text-gray-900 hover:text-blue-600">
+                    <p className="uppercase tracking-wide">LinkedIn</p>
+                    <a href="https://linkedin.com/in/aidenbrown21" target="_blank" rel="noopener noreferrer" className="underline underline-offset-4 hover:no-underline">
                       linkedin.com/in/aidenbrown21
                     </a>
                   </div>
                 </div>
               </div>
             </div>
-          </div>
 
-          {/* Contact Form */}
-          <div>
-            <form onSubmit={handleSubmit} className="space-y-6">
-              <div>
-                <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2">
-                  Name
-                </label>
-                <input
-                  type="text"
-                  id="name"
-                  name="name"
-                  value={formData.name}
-                  onChange={handleChange}
-                  required
-                  className="w-full px-4 py-3 rounded-lg border border-gray-300 bg-white backdrop-blur-sm text-gray-900 placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
-                  placeholder="John Doe"
-                />
-              </div>
-
-              <div>
-                <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
-                  Email
-                </label>
-                <input
-                  type="email"
-                  id="email"
-                  name="email"
-                  value={formData.email}
-                  onChange={handleChange}
-                  required
-                  className="w-full px-4 py-3 rounded-lg border border-gray-300 bg-white backdrop-blur-sm text-gray-900 placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
-                  placeholder="john@example.com"
-                />
-              </div>
-
-              <div>
-                <label htmlFor="message" className="block text-sm font-medium text-gray-700 mb-2">
-                  Message
-                </label>
-                <textarea
-                  id="message"
-                  name="message"
-                  value={formData.message}
-                  onChange={handleChange}
-                  required
-                  rows={5}
-                  className="w-full px-4 py-3 rounded-lg border border-gray-300 bg-white backdrop-blur-sm text-gray-900 placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors resize-none"
-                  placeholder="Tell me about your project..."
-                />
-              </div>
-
-              <button
-                type="submit"
-                disabled={isSubmitting}
-                className="w-full px-8 py-3 bg-gradient-to-r from-sky-500 to-blue-700 text-white rounded-lg hover:from-sky-600 hover:to-blue-800 transition-all font-medium disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {isSubmitting ? 'Sending...' : 'Send Message'}
-              </button>
-
-              {/* Status Messages */}
-              {submitStatus === 'success' && (
-                <div className="mt-4 p-4 bg-green-500/20 border border-green-500 rounded-lg text-green-400 text-center">
-                  Message sent successfully! I'll get back to you soon.
+            {/* Contact Form */}
+            <div>
+              <form onSubmit={handleSubmit} className="space-y-6">
+                <div>
+                  <label htmlFor="name" className="block text-xs uppercase font-bold tracking-wide mb-2">
+                    Name
+                  </label>
+                  <input
+                    type="text"
+                    id="name"
+                    name="name"
+                    value={formData.name}
+                    onChange={handleChange}
+                    required
+                    className="w-full px-3 py-2 border-2 border-black bg-[#f6f1e7] text-black placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-black/50"
+                    placeholder="John Doe"
+                  />
                 </div>
-              )}
-              {submitStatus === 'error' && (
-                <div className="mt-4 p-4 bg-red-500/20 border border-red-500 rounded-lg text-red-400 text-center">
-                  Failed to send message. Please try again or email me directly.
+
+                <div>
+                  <label htmlFor="email" className="block text-xs uppercase font-bold tracking-wide mb-2">
+                    Email
+                  </label>
+                  <input
+                    type="email"
+                    id="email"
+                    name="email"
+                    value={formData.email}
+                    onChange={handleChange}
+                    required
+                    className="w-full px-3 py-2 border-2 border-black bg-[#f6f1e7] text-black placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-black/50"
+                    placeholder="john@example.com"
+                  />
                 </div>
-              )}
-            </form>
+
+                <div>
+                  <label htmlFor="message" className="block text-xs uppercase font-bold tracking-wide mb-2">
+                    Message
+                  </label>
+                  <textarea
+                    id="message"
+                    name="message"
+                    value={formData.message}
+                    onChange={handleChange}
+                    required
+                    rows={5}
+                    className="w-full px-3 py-2 border-2 border-black bg-[#f6f1e7] text-black placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-black/50 resize-none"
+                    placeholder="Tell me about your project..."
+                  />
+                </div>
+
+                <button
+                  type="submit"
+                  disabled={isSubmitting}
+                  className="w-full px-6 py-2 bg-black text-[#f6f1e7] font-bold uppercase tracking-wide border-2 border-black disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {isSubmitting ? 'Sending...' : 'Send Message'}
+                </button>
+
+                {/* Status Messages */}
+                {submitStatus === 'success' && (
+                  <div className="mt-4 p-4 border-2 border-black bg-[#efe7da] text-black text-center font-bold">
+                    Message sent successfully! I&apos;ll get back to you soon.
+                  </div>
+                )}
+                {submitStatus === 'error' && (
+                  <div className="mt-4 p-4 border-2 border-black bg-[#efe7da] text-black text-center font-bold">
+                    Failed to send message. Please try again or email me directly.
+                  </div>
+                )}
+              </form>
+            </div>
           </div>
         </div>
       </div>
