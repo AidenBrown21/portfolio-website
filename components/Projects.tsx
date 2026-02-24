@@ -51,7 +51,7 @@ const projects: Project[] = [
   },
   {
     id: 3,
-    title: 'Notify (Expected December 2025)',
+    title: 'Notify (Expected Soon)',
     description: 'A user focused student productivity app. Class management, intelligent note-taking, and homework tracking in one platform. Key features include live audio transcription using Apples Speech Recognition framework to automatically convert lecture recordings into bulletpoints, a fully fleshed out canvas for note taking, and auto-assigning times to work on homework based on the users schedule.',
     technologies: ['Swift', 'SwiftData', 'Firebase Auth', 'Firebase Storage', 'Hugger API' ],
     githubUrl: undefined,
