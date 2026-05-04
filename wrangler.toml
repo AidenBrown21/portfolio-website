@@ -1,3 +1,10 @@
 name = "portfolio"
 compatibility_date = "2024-01-01"
-pages_build_output_dir = "./out"
+
+# Do not set `pages_build_output_dir` here if you use Cloudflare Pages **Settings**
+# for build command (`npm run build`) and output directory (`out`). When both exist,
+# some projects fail to pass **dashboard** environment variables into `next build`,
+# so `NEXT_PUBLIC_*` never gets inlined (local `.env.local` still works).
+#
+# For local CLI deploys: `npx wrangler pages deploy ./out --project-name=portfolio`
+# (or your project name). See: https://developers.cloudflare.com/workers/wrangler/commands/#pages-deploy
