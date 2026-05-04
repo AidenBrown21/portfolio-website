@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useState } from "react";
+import { useCallback, useMemo, useState, type FormEvent } from "react";
 
 type YoutubeSearchItem = {
   videoId: string;
@@ -14,60 +14,205 @@ type SearchResponse = {
   message?: string;
 };
 
+type FavoriteChannel = {
+  name: string;
+  handle: string;
+  description: string;
+  channelId: string;
+  imageSrc: string;
+};
+
+type FeedCategory = "All" | "Vlogs" | "Tech" | "Gaming" | "Music" | "Podcasts";
+
+type SideNavItem = {
+  label: string;
+  emoji: string;
+};
+
+type FeaturedVideo = {
+  videoId: string;
+  title: string;
+  channelName: string;
+  metaLabel: string;
+};
+
+const FAVORITE_CHANNELS: FavoriteChannel[] = [
+  {
+    name: "Casey Neistat",
+    handle: "@casey",
+    description: "Cinematic vlogs and storytelling.",
+    channelId: "UCtinbF-Q-fVthA0qrFQTgXQ",
+    imageSrc: "/Casey.jpg",
+  },
+  {
+    name: "Ryan Trahan",
+    handle: "@ryan",
+    description: "Challenges, travel, and creator experiments.",
+    channelId: "UCnmGIkw-KdI0W5siakKPKog",
+    imageSrc: "/Ryan.jpg",
+  },
+  {
+    name: "Ludwig",
+    handle: "@ludwig",
+    description: "Live content, commentary, and creator events.",
+    channelId: "UCmbSGFM9OU8FwjxZCevr6zw",
+    imageSrc: "/ludwig.jpg",
+  },
+];
+
+const SIDE_NAV_ITEMS: SideNavItem[] = [
+  { label: "Home", emoji: "🏠" },
+  { label: "Shorts", emoji: "🎬" },
+  { label: "Subscriptions", emoji: "📺" },
+  { label: "You", emoji: "👤" },
+  { label: "History", emoji: "🕒" },
+];
+
+const FEED_CATEGORIES: FeedCategory[] = ["All", "Vlogs", "Tech", "Gaming", "Music", "Podcasts"];
+
+const QUICK_SEARCH_TERMS = [
+  "Casey Neistat",
+  "Ryan Trahan challenge",
+  "Ludwig clips",
+  "MKBHD",
+  "AI tools",
+  "iOS dev",
+] as const;
+
+const FEATURED_VIDEOS: FeaturedVideo[] = [
+  {
+    videoId: "jG7dSXcfVqE",
+    title: "Do what you cant",
+    channelName: "Casey Neistat",
+    metaLabel: "Featured pick",
+  },
+  {
+    videoId: "z2kUM-xuwy8",
+    title: "I Visited 50 States in 50 Days - Day 36",
+    channelName: "Ryan Trahan",
+    metaLabel: "Featured pick",
+  },
+  {
+    videoId: "B-tL7220WYc",
+    title: "How I Accidentally Became the Best Mario Party Player in the World",
+    channelName: "Ludwig",
+    metaLabel: "Featured pick",
+  },
+];
+
 export default function YouTubeWindowContent() {
   const [query, setQuery] = useState("");
   const [items, setItems] = useState<YoutubeSearchItem[]>([]);
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [activeChannel, setActiveChannel] = useState<FavoriteChannel | null>(null);
+  const [activeCategory, setActiveCategory] = useState<FeedCategory>("All");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const runSearch = useCallback(
-    async (event?: React.FormEvent) => {
-      event?.preventDefault();
-      const q = query.trim();
-      if (!q) {
+  const executeSearch = useCallback(async (rawQuery: string, channelId?: string) => {
+    const q = rawQuery.trim();
+    if (!q) {
+      return;
+    }
+
+    setLoading(true);
+    setError(null);
+
+    try {
+      const searchParams = new URLSearchParams({ q });
+      if (channelId) {
+        searchParams.set("channelId", channelId);
+      }
+      const response = await fetch(`/api/youtube-search?${searchParams.toString()}`);
+      const data = (await response.json().catch(() => ({}))) as SearchResponse;
+
+      if (!response.ok) {
+        setItems([]);
+        setSelectedId(null);
+        setError(
+          data.message ??
+            "Search is unavailable. On Cloudflare Pages, set the YOUTUBE_API_KEY secret. For local API testing, run wrangler pages dev after npm run build.",
+        );
         return;
       }
 
-      setLoading(true);
-      setError(null);
+      const nextItems = data.items ?? [];
+      setItems(nextItems);
+      setSelectedId(null);
+    } catch {
+      setItems([]);
+      setSelectedId(null);
+      setError("Could not reach the search service.");
+    } finally {
+      setLoading(false);
+    }
+  }, []);
 
-      try {
-        const response = await fetch(
-          `/api/youtube-search?q=${encodeURIComponent(q)}`,
-        );
-        const data = (await response.json().catch(() => ({}))) as SearchResponse;
-
-        if (!response.ok) {
-          setItems([]);
-          setSelectedId(null);
-          setError(
-            data.message ??
-              "Search is unavailable. On Cloudflare Pages, set the YOUTUBE_API_KEY secret. For local API testing, run wrangler pages dev after npm run build.",
-          );
-          return;
-        }
-
-        const nextItems = data.items ?? [];
-        setItems(nextItems);
-        setSelectedId(nextItems[0]?.videoId ?? null);
-      } catch {
-        setItems([]);
-        setSelectedId(null);
-        setError("Could not reach the search service.");
-      } finally {
-        setLoading(false);
-      }
+  const runSearch = useCallback(
+    (event?: FormEvent) => {
+      event?.preventDefault();
+      setActiveChannel(null);
+      void executeSearch(query);
     },
-    [query],
+    [executeSearch, query],
   );
 
+  const quickSearch = useCallback(
+    (term: string) => {
+      setQuery(term);
+      setActiveChannel(null);
+      void executeSearch(term);
+    },
+    [executeSearch],
+  );
+  const openFeaturedVideo = useCallback((videoId: string) => {
+    setSelectedId(videoId);
+  }, []);
+  const openFavoriteChannel = useCallback(
+    (channel: FavoriteChannel) => {
+      setQuery(channel.name);
+      setActiveChannel(channel);
+      void executeSearch(channel.name, channel.channelId);
+    },
+    [executeSearch],
+  );
+
+  const featuredItems = useMemo<YoutubeSearchItem[]>(
+    () =>
+      FEATURED_VIDEOS.map((video) => ({
+        videoId: video.videoId,
+        title: video.title,
+        channelTitle: video.channelName,
+        thumbnailUrl: `https://i.ytimg.com/vi/${video.videoId}/hqdefault.jpg`,
+      })),
+    [],
+  );
+  const selectedItem = useMemo(() => {
+    if (!selectedId) {
+      return null;
+    }
+    return (
+      items.find((item) => item.videoId === selectedId) ??
+      featuredItems.find((item) => item.videoId === selectedId) ??
+      null
+    );
+  }, [featuredItems, items, selectedId]);
+  const upNextItems = items.length > 0 ? items.slice(0, 6) : featuredItems;
+  const showStarterHome = !loading && !error && items.length === 0 && !selectedId;
+  const showSearchGrid = !loading && !selectedId && items.length > 0;
+
   return (
-    <div className="-m-6 flex h-[calc(100%+3rem)] flex-col overflow-hidden bg-[#f4f5f7] text-black md:-m-8 md:h-[calc(100%+4rem)]">
+    <div className="-m-6 flex h-[calc(100%+3rem)] flex-col overflow-hidden bg-[#ffffff] text-[#0f0f0f] md:-m-8 md:h-[calc(100%+4rem)]">
       <form
         onSubmit={runSearch}
-        className="flex shrink-0 items-center gap-2 border-b border-black/10 bg-[#eceef2] px-3 py-2 md:px-4"
+        className="flex shrink-0 items-center gap-2 border-b border-black/10 bg-white px-3 py-2 md:px-4"
       >
+        <span className="hidden items-center gap-2 rounded-full px-2 py-1 text-[12px] font-semibold text-black md:inline-flex">
+          <span className="inline-flex h-5 w-7 items-center justify-center rounded-[5px] bg-[#ff0000] text-[10px] text-white">
+            ▶
+          </span>
+          YouTube
+        </span>
         <label htmlFor="youtube-search" className="sr-only">
           Search YouTube
         </label>
@@ -76,90 +221,313 @@ export default function YouTubeWindowContent() {
           type="search"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          placeholder="Search videos…"
+          placeholder="Search"
           autoComplete="off"
-          className="min-w-0 flex-1 rounded-lg border border-black/15 bg-white px-3 py-1.5 text-sm outline-none ring-black/20 focus:ring-2"
+          className="min-w-0 flex-1 rounded-full border border-black/20 bg-white px-4 py-2 text-sm text-black placeholder:text-black/45 outline-none ring-black/20 focus:ring-2"
         />
         <button
           type="submit"
           disabled={loading || !query.trim()}
-          className="shrink-0 rounded-lg border border-black/15 bg-white px-3 py-1.5 text-sm font-medium text-black/80 transition-colors hover:bg-black/[0.04] disabled:pointer-events-none disabled:opacity-45"
+          className="shrink-0 rounded-full border border-black/20 bg-[#f8f8f8] px-4 py-2 text-sm font-medium text-black transition-colors hover:bg-[#ececec] disabled:pointer-events-none disabled:opacity-45"
         >
-          {loading ? "Searching…" : "Search"}
+          {loading ? "Searching..." : "Search"}
         </button>
       </form>
 
-      <div className="flex min-h-0 flex-1 flex-col md:flex-row">
-        <div className="flex min-h-0 min-w-0 flex-1 flex-col border-b border-black/10 md:border-b-0 md:border-r">
+      <div className="flex min-h-0 flex-1">
+        <aside className="hidden w-[220px] shrink-0 border-r border-black/10 bg-white p-2 lg:block">
+          <ul className="space-y-1">
+            {SIDE_NAV_ITEMS.map((item) => (
+              <li key={item.label}>
+                <button
+                  type="button"
+                  className={`flex w-full items-center gap-3 rounded-lg px-3 py-2 text-left text-sm ${
+                    item.label === "Home" ? "bg-black/6 font-semibold" : "hover:bg-black/5"
+                  }`}
+                >
+                  <span className="text-base">{item.emoji}</span>
+                  <span>{item.label}</span>
+                </button>
+              </li>
+            ))}
+          </ul>
+          <div className="mt-4 border-t border-black/10 pt-3">
+            <p className="px-3 text-[11px] font-semibold uppercase tracking-[0.12em] text-black/45">
+              Subscriptions
+            </p>
+            <ul className="mt-2 space-y-1">
+              {FAVORITE_CHANNELS.slice(0, 5).map((channel) => (
+                <li key={channel.handle}>
+                  <button
+                    type="button"
+                    onClick={() => openFavoriteChannel(channel)}
+                    className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm hover:bg-black/5"
+                  >
+                    <img
+                      src={channel.imageSrc}
+                      alt={channel.name}
+                      width={24}
+                      height={24}
+                      className="h-6 w-6 rounded-full object-cover"
+                    />
+                    <span className="truncate">{channel.name}</span>
+                  </button>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </aside>
+
+        <div className="flex min-h-0 min-w-0 flex-1 flex-col">
+          <div className="scrollbar-thin flex shrink-0 items-center gap-2 overflow-x-auto border-b border-black/10 bg-white px-3 py-2">
+            {FEED_CATEGORIES.map((category) => (
+              <button
+                key={category}
+                type="button"
+                onClick={() => setActiveCategory(category)}
+                className={`shrink-0 rounded-lg px-3 py-1.5 text-xs font-medium transition-colors ${
+                  activeCategory === category
+                    ? "bg-[#0f0f0f] text-white"
+                    : "bg-[#f2f2f2] text-black hover:bg-[#e5e5e5]"
+                }`}
+              >
+                {category}
+              </button>
+            ))}
+          </div>
+
           {selectedId ? (
-            <div className="flex min-h-0 flex-1 flex-col bg-black p-2 md:p-3">
-              <div className="relative aspect-video w-full shrink-0 overflow-hidden rounded-lg bg-black">
-                <iframe
-                  title="YouTube video player"
-                  src={`https://www.youtube.com/embed/${selectedId}`}
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                  allowFullScreen
-                  className="absolute inset-0 h-full w-full border-0"
-                />
+            <div className="flex min-h-0 flex-1 flex-col gap-3 bg-white p-3 md:flex-row md:p-4">
+              <div className="min-w-0 flex-1">
+                <div className="relative aspect-video w-full overflow-hidden rounded-xl bg-black">
+                  <iframe
+                    title="YouTube video player"
+                    src={`https://www.youtube.com/embed/${selectedId}`}
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                    allowFullScreen
+                    className="absolute inset-0 h-full w-full border-0"
+                  />
+                </div>
+                {selectedItem && (
+                  <div className="mt-3 space-y-1">
+                    <p className="line-clamp-2 text-base font-semibold text-black">
+                      {selectedItem.title}
+                    </p>
+                    <p className="text-sm text-black/60">{selectedItem.channelTitle}</p>
+                  </div>
+                )}
+                <button
+                  type="button"
+                  onClick={() => setSelectedId(null)}
+                  className="mt-3 rounded-full border border-black/15 px-3 py-1.5 text-xs font-medium hover:bg-black/5"
+                >
+                  Back to feed
+                </button>
+              </div>
+              <div className="md:w-[320px]">
+                <p className="mb-2 text-xs font-semibold uppercase tracking-[0.12em] text-black/45">
+                  Up next
+                </p>
+                <ul className="space-y-2">
+                  {upNextItems.map((item) => (
+                    <li key={item.videoId}>
+                      <button
+                        type="button"
+                        onClick={() => setSelectedId(item.videoId)}
+                        className={`flex w-full gap-2 rounded-lg p-2 text-left transition-colors hover:bg-black/5 ${
+                          item.videoId === selectedId ? "bg-black/6" : ""
+                        }`}
+                      >
+                        <img
+                          src={item.thumbnailUrl}
+                          alt=""
+                          width={120}
+                          height={68}
+                          className="h-[68px] w-[120px] shrink-0 rounded-lg object-cover"
+                        />
+                        <span className="min-w-0">
+                          <span className="line-clamp-2 block text-xs font-medium text-black">
+                            {item.title}
+                          </span>
+                          <span className="mt-1 block text-[11px] text-black/55">
+                            {item.channelTitle}
+                          </span>
+                        </span>
+                      </button>
+                    </li>
+                  ))}
+                </ul>
               </div>
             </div>
-          ) : (
-            <div className="flex flex-1 items-center justify-center px-4 py-8 text-center text-sm text-black/50">
-              {loading
-                ? "Loading…"
-                : "Search for a topic, then pick a result to play here."}
+          ) : showStarterHome ? (
+            <div className="min-h-0 flex-1 overflow-y-auto px-4 py-4 md:px-5">
+              <div className="mb-4 flex items-end justify-between gap-3">
+                <div>
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-black/45">
+                    Favorite Channels
+                  </p>
+                  <h2 className="mt-1 text-xl font-semibold text-black">
+                    These are my favorite channels
+                  </h2>
+                </div>
+                <span className="text-xs text-black/45">Category: {activeCategory}</span>
+              </div>
+              <ul className="flex gap-4 overflow-x-auto pb-1">
+                {FAVORITE_CHANNELS.map((channel) => (
+                  <li
+                    key={channel.handle}
+                    className="h-[255px] w-[260px] min-w-[260px] max-w-[260px] shrink-0"
+                  >
+                    <button
+                      type="button"
+                      onClick={() => openFavoriteChannel(channel)}
+                      className="group flex h-full w-full flex-col overflow-hidden rounded-xl border border-black/10 bg-white text-left transition hover:border-black/25 hover:shadow-[0_8px_24px_rgba(0,0,0,0.08)]"
+                    >
+                      <div className="relative aspect-video overflow-hidden text-white">
+                        <img
+                          src={channel.imageSrc}
+                          alt={channel.name}
+                          width={480}
+                          height={270}
+                          className="h-full w-full object-cover"
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent p-3">
+                          <div className="flex h-full flex-col justify-between">
+                          <span className="inline-flex w-fit rounded-full bg-white/20 px-2 py-0.5 text-[11px] font-medium">
+                            Featured creator
+                          </span>
+                          <span className="text-sm font-semibold">{channel.name}</span>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="flex min-h-0 flex-1 flex-col p-3">
+                        <p className="line-clamp-1 text-sm font-semibold text-black">
+                          {channel.name}
+                        </p>
+                        <p className="text-xs text-black/55">{channel.handle}</p>
+                        <p className="mt-2 line-clamp-2 min-h-[2.5rem] text-xs text-black/75">
+                          {channel.description}
+                        </p>
+                      </div>
+                    </button>
+                  </li>
+                ))}
+              </ul>
+              <div className="mt-6">
+                <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.12em] text-black/45">
+                  Featured Videos
+                </p>
+                <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                  {FEATURED_VIDEOS.map((video) => (
+                    <li key={video.videoId}>
+                      <button
+                        type="button"
+                        onClick={() => openFeaturedVideo(video.videoId)}
+                        className="group block w-full text-left"
+                      >
+                        <img
+                          src={`https://i.ytimg.com/vi/${video.videoId}/hqdefault.jpg`}
+                          alt={video.title}
+                          width={480}
+                          height={270}
+                          className="aspect-video w-full rounded-2xl object-cover transition group-hover:brightness-95"
+                        />
+                        <div className="mt-2 flex items-start gap-2">
+                          <div className="min-w-0 flex-1">
+                            <p className="line-clamp-2 text-[18px] font-semibold leading-7 text-black">
+                              {video.title}
+                            </p>
+                            <p className="mt-1 text-sm text-black/65">{video.channelName}</p>
+                            <p className="mt-0.5 text-sm text-black/55">{video.metaLabel}</p>
+                          </div>
+                          <span
+                            className="mt-0.5 inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-black/70 transition group-hover:bg-black/5"
+                            aria-hidden="true"
+                          >
+                            <svg viewBox="0 0 24 24" className="h-5 w-5 fill-current">
+                              <circle cx="12" cy="5" r="1.7" />
+                              <circle cx="12" cy="12" r="1.7" />
+                              <circle cx="12" cy="19" r="1.7" />
+                            </svg>
+                          </span>
+                        </div>
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+              <div className="mt-6">
+                <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.12em] text-black/45">
+                  Quick searches
+                </p>
+                <div className="flex flex-wrap gap-2">
+                  {QUICK_SEARCH_TERMS.map((term) => (
+                    <button
+                      key={term}
+                      type="button"
+                      onClick={() => quickSearch(term)}
+                      className="rounded-full border border-black/15 bg-[#f2f2f2] px-3 py-1.5 text-xs font-medium text-black hover:bg-[#e5e5e5]"
+                    >
+                      {term}
+                    </button>
+                  ))}
+                </div>
+              </div>
             </div>
-          )}
-        </div>
-
-        <aside className="flex h-44 shrink-0 flex-col md:h-auto md:w-72 md:shrink-0 md:border-l md:border-black/10">
-          <div className="border-b border-black/10 px-3 py-2 text-[11px] font-semibold uppercase tracking-[0.12em] text-black/45">
-            Results
-          </div>
-          <div className="min-h-0 flex-1 overflow-y-auto">
-            {error && (
-              <p className="border-b border-black/10 px-3 py-3 text-xs leading-relaxed text-red-700/90">
-                {error}
-              </p>
-            )}
-            {!loading && items.length === 0 && !error && (
-              <p className="px-3 py-4 text-xs text-black/45">No results yet.</p>
-            )}
-            <ul className="divide-y divide-black/10">
-              {items.map((item) => {
-                const isActive = item.videoId === selectedId;
-                return (
+          ) : showSearchGrid ? (
+            <div className="min-h-0 flex-1 overflow-y-auto px-4 py-4 md:px-5">
+              <div className="mb-4 flex items-end justify-between gap-3">
+                <p className="text-sm font-semibold text-black">
+                  {activeChannel ? (
+                    <>
+                      Channel videos for <span className="text-black/60">{activeChannel.name}</span>
+                    </>
+                  ) : (
+                    <>
+                      Search results for <span className="text-black/60">{query.trim()}</span>
+                    </>
+                  )}
+                </p>
+                <span className="text-xs text-black/45">{items.length} videos</span>
+              </div>
+              <ul className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+                {items.map((item) => (
                   <li key={item.videoId}>
                     <button
                       type="button"
                       onClick={() => setSelectedId(item.videoId)}
-                      className={`flex w-full gap-2 px-2 py-2 text-left text-xs transition-colors hover:bg-black/[0.04] ${
-                        isActive ? "bg-black/[0.06]" : ""
-                      }`}
+                      className="group block w-full text-left"
                     >
                       <img
                         src={item.thumbnailUrl}
                         alt=""
-                        width={88}
-                        height={50}
-                        className="h-[50px] w-[88px] shrink-0 rounded object-cover"
+                        width={480}
+                        height={270}
+                        className="aspect-video w-full rounded-xl object-cover transition group-hover:brightness-95"
                       />
-                      <span className="min-w-0 flex-1">
-                        <span className="line-clamp-2 font-medium text-black/90">
+                      <div className="mt-2">
+                        <p className="line-clamp-2 text-sm font-semibold text-black">
                           {item.title}
-                        </span>
-                        <span className="mt-0.5 line-clamp-1 text-[10px] text-black/45">
-                          {item.channelTitle}
-                        </span>
-                      </span>
+                        </p>
+                        <p className="mt-1 text-xs text-black/55">{item.channelTitle}</p>
+                      </div>
                     </button>
                   </li>
-                );
-              })}
-            </ul>
-          </div>
-        </aside>
+                ))}
+              </ul>
+            </div>
+          ) : (
+            <div className="flex flex-1 items-center justify-center px-4 py-8 text-center text-sm text-black/55">
+              {loading ? "Loading..." : "No results found. Try another search."}
+            </div>
+          )}
+        </div>
       </div>
+      {error && (
+        <p className="border-t border-black/10 bg-[#fff5f6] px-3 py-2 text-xs text-[#b42339]">
+          {error}
+        </p>
+      )}
     </div>
   );
 }

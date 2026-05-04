@@ -5,6 +5,7 @@
  */
 
 const MAX_QUERY_LENGTH = 200;
+const MAX_CHANNEL_ID_LENGTH = 64;
 const MAX_RESULTS = 12;
 
 type YouTubeSearchListResponse = {
@@ -45,6 +46,8 @@ export async function onRequestGet(context: {
   const url = new URL(context.request.url);
   const rawQ = url.searchParams.get("q") ?? "";
   const q = rawQ.trim();
+  const rawChannelId = url.searchParams.get("channelId") ?? "";
+  const channelId = rawChannelId.trim();
 
   if (!q) {
     return Response.json({ message: "Missing search query.", items: [] }, { status: 400 });
@@ -53,12 +56,18 @@ export async function onRequestGet(context: {
   if (q.length > MAX_QUERY_LENGTH) {
     return Response.json({ message: "Query is too long.", items: [] }, { status: 400 });
   }
+  if (channelId.length > MAX_CHANNEL_ID_LENGTH) {
+    return Response.json({ message: "Channel id is too long.", items: [] }, { status: 400 });
+  }
 
   const upstream = new URL("https://www.googleapis.com/youtube/v3/search");
   upstream.searchParams.set("part", "snippet");
   upstream.searchParams.set("type", "video");
   upstream.searchParams.set("maxResults", String(MAX_RESULTS));
   upstream.searchParams.set("q", q);
+  if (channelId) {
+    upstream.searchParams.set("channelId", channelId);
+  }
   upstream.searchParams.set("key", apiKey);
 
   let upstreamJson: YouTubeSearchListResponse;
