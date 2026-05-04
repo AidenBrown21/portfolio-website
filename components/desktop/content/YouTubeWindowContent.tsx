@@ -165,6 +165,13 @@ export default function YouTubeWindowContent() {
     },
     [executeSearch],
   );
+  const goToHome = useCallback(() => {
+    setQuery("");
+    setItems([]);
+    setSelectedId(null);
+    setActiveChannel(null);
+    setError(null);
+  }, []);
   const openFeaturedVideo = useCallback((videoId: string) => {
     setSelectedId(videoId);
   }, []);
@@ -207,15 +214,23 @@ export default function YouTubeWindowContent() {
         onSubmit={runSearch}
         className="flex shrink-0 items-center gap-2 border-b border-black/10 bg-white px-3 py-2 md:px-4"
       >
-        <span className="hidden items-center gap-2 rounded-full px-2 py-1 text-[12px] font-semibold text-black md:inline-flex">
-          <span className="inline-flex h-5 w-7 items-center justify-center rounded-[5px] bg-[#ff0000] text-[10px] text-white">
-            ▶
-          </span>
-          YouTube
-        </span>
         <label htmlFor="youtube-search" className="sr-only">
           Search YouTube
         </label>
+        <button
+          type="button"
+          onClick={goToHome}
+          className="inline-flex shrink-0 items-center justify-center rounded-full border border-black/20 bg-[#f8f8f8] px-2.5 py-2 text-black transition-colors hover:bg-[#ececec]"
+          aria-label="Go to YouTube home"
+        >
+          <svg viewBox="0 0 24 24" className="h-5 w-[34px]" fill="none" aria-hidden="true">
+            <path
+              fill="#FF0000"
+              d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814z"
+            />
+            <path fill="#fff" d="M9.545 15.568V8.432L15.818 12l-6.273 3.568z" />
+          </svg>
+        </button>
         <input
           id="youtube-search"
           type="search"
@@ -228,9 +243,28 @@ export default function YouTubeWindowContent() {
         <button
           type="submit"
           disabled={loading || !query.trim()}
-          className="shrink-0 rounded-full border border-black/20 bg-[#f8f8f8] px-4 py-2 text-sm font-medium text-black transition-colors hover:bg-[#ececec] disabled:pointer-events-none disabled:opacity-45"
+          className="shrink-0 rounded-full border border-black/20 bg-[#f8f8f8] px-4 py-2 text-sm font-medium text-black transition-colors hover:bg-[#ececec] disabled:cursor-not-allowed disabled:text-black/70"
+          aria-label="Search videos"
         >
-          {loading ? "Searching..." : "Search"}
+          <span className="inline-flex items-center gap-1.5">
+            <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" aria-hidden="true">
+              <circle
+                cx="11"
+                cy="11"
+                r="6"
+                stroke="currentColor"
+                strokeWidth="1.8"
+                strokeLinecap="round"
+              />
+              <path
+                d="M16 16l4 4"
+                stroke="currentColor"
+                strokeWidth="1.8"
+                strokeLinecap="round"
+              />
+            </svg>
+            <span>{loading ? "Searching..." : "Search"}</span>
+          </span>
         </button>
       </form>
 
