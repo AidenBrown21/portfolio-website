@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from "react";
-import emailjs from "@emailjs/browser";
+import { sendContactEmail } from "@/lib/sendContactEmail";
 
 export default function ContactWindowContent() {
   const [formData, setFormData] = useState({
@@ -20,24 +20,13 @@ export default function ContactWindowContent() {
     setSubmitStatus("idle");
 
     try {
-      const result = await emailjs.send(
-        process.env.NEXT_PUBLIC_EMAILJS_SERVICE_ID!,
-        process.env.NEXT_PUBLIC_EMAILJS_TEMPLATE_ID!,
-        {
-          from_name: formData.name,
-          from_email: formData.email,
-          message: formData.message,
-          to_name: "Aiden Brown",
-        },
-        process.env.NEXT_PUBLIC_EMAILJS_PUBLIC_KEY!,
-      );
-
-      if (result.status === 200) {
-        setSubmitStatus("success");
-        setFormData({ name: "", email: "", message: "" });
-      } else {
-        setSubmitStatus("error");
-      }
+      await sendContactEmail({
+        name: formData.name,
+        email: formData.email,
+        message: formData.message,
+      });
+      setSubmitStatus("success");
+      setFormData({ name: "", email: "", message: "" });
     } catch (error) {
       console.error("Email send error:", error);
       setSubmitStatus("error");
