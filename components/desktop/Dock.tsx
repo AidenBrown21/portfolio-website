@@ -123,6 +123,25 @@ export default function Dock({
       );
     }
 
+    if (id === "youtube") {
+      return (
+        <svg viewBox="0 0 24 24" className="h-5 w-5" aria-hidden="true">
+          <rect
+            x="2.25"
+            y="5.25"
+            width="19.5"
+            height="13.5"
+            rx="3.5"
+            className="fill-[#FF0000]"
+          />
+          <path
+            className="fill-white"
+            d="M10.35 9.45v5.1L15.45 12l-5.1-2.55z"
+          />
+        </svg>
+      );
+    }
+
     return (
       <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" aria-hidden="true">
         <path

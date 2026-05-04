@@ -27,6 +27,7 @@ import PhotosWindowContent, {
 } from "@/components/desktop/content/PhotosWindowContent";
 import ProjectWindowContent from "@/components/desktop/content/ProjectWindowContent";
 import ResumeWindowContent from "@/components/desktop/content/ResumeWindowContent";
+import YouTubeWindowContent from "@/components/desktop/content/YouTubeWindowContent";
 
 const baseWindowConfigs: Record<BaseWindowId, BaseWindowConfig> = {
   finder: {
@@ -64,6 +65,11 @@ const baseWindowConfigs: Record<BaseWindowId, BaseWindowConfig> = {
     title: "Resume",
     frame: { x: 166, y: 76, width: 760, height: 560 },
   },
+  youtube: {
+    id: "youtube",
+    title: "YouTube",
+    frame: { x: 72, y: 52, width: 900, height: 560 },
+  },
 };
 
 const dockItems: DockItem[] = [
@@ -73,6 +79,7 @@ const dockItems: DockItem[] = [
   { id: "projects", label: "Projects" },
   { id: "about", label: "About" },
   { id: "contact", label: "Contact" },
+  { id: "youtube", label: "YouTube" },
 ];
 
 const WEEKDAY_SHORT = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"] as const;
@@ -147,6 +154,7 @@ export default function WindowManager() {
     projects: baseWindowConfigs.projects.frame,
     contact: baseWindowConfigs.contact.frame,
     resume: baseWindowConfigs.resume.frame,
+    youtube: baseWindowConfigs.youtube.frame,
   });
   const [minimizedWindows, setMinimizedWindows] = useState<AppWindowId[]>([]);
   const [minimizedDockEntries, setMinimizedDockEntries] = useState<MinimizedDockEntry[]>([]);
@@ -383,6 +391,13 @@ export default function WindowManager() {
       return {
         previewUrl: "/pdf.png",
         previewText: "Aiden Brown resume PDF",
+      };
+    }
+
+    if (windowId === "youtube") {
+      return {
+        previewUrl: null,
+        previewText: "Search and watch videos",
       };
     }
 
@@ -761,6 +776,7 @@ export default function WindowManager() {
               )}
               {windowId === "contact" && <ContactWindowContent />}
               {windowId === "resume" && <ResumeWindowContent />}
+              {windowId === "youtube" && <YouTubeWindowContent />}
             </Window>
           );
         })}

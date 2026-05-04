@@ -8,3 +8,7 @@ compatibility_date = "2024-01-01"
 #
 # For local CLI deploys: `npx wrangler pages deploy ./out --project-name=portfolio`
 # (or your project name). See: https://developers.cloudflare.com/workers/wrangler/commands/#pages-deploy
+#
+# YouTube search (`functions/api/youtube-search.ts`): set YOUTUBE_API_KEY in Pages → Settings →
+# Variables (secret). For local Pages Functions: put YOUTUBE_API_KEY in `.dev.vars`, then
+# `npm run build && npx wrangler pages dev ./out`.
