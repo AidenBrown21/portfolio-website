@@ -22,11 +22,6 @@ interface ProjectModalProps {
 export default function ProjectModal({ project, onClose }: ProjectModalProps) {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
-  // Reset image index when project changes
-  useEffect(() => {
-    setCurrentImageIndex(0);
-  }, [project]);
-
   // Close modal on escape key and handle arrow keys
   useEffect(() => {
     const handleKeyPress = (e: KeyboardEvent) => {

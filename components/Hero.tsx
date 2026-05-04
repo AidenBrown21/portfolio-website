@@ -31,8 +31,10 @@ export default function Hero() {
               </div>
 
               <p className="text-base sm:text-lg font-medium">
-                Pursuing a Bachelor of Science in Computer Science at Purdue University, expected to graduate in May 2027.
-                Focused on Front-end Development and IOS applications. Currently looking for an internship for Summer 2026.
+                Pursuing a Bachelor of Science in Artificial Intelligence at Purdue University, expected to graduate in May 2027.
+                Focused on Front-end Development and IOS applications. Currently looking for an internship for Winter 2026.
+                I'm passionate about building products that solve practical problems I've personally experienced. Whether it's at a hackathon or in my free time, I'm always looking for new projects to work on.
+                Please reach out if you have any questions or want to collaborate in a hackathon (I'm willing to travel) or on a project! 
               </p>
 
               <div className="flex flex-col sm:flex-row gap-4">
