@@ -260,7 +260,6 @@ export default function WindowManager() {
         label: project.title,
         typeLabel: "Project Folder",
         icon: "folder",
-        description: project.description,
         modifiedLabel: "Today",
         sizeLabel: "--",
         desktopSide: "right",

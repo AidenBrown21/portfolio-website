@@ -129,7 +129,9 @@ export default function FinderWindow({
       <div className="flex h-7 items-center justify-between border-t border-black/10 bg-[#f7f7f8] px-3 text-[11px] text-black/55">
         <span>{files.length} items</span>
         <span>
-          {showStatusDescription ? selectedFile?.description ?? "Ready" : ""}
+          {showStatusDescription
+            ? (selectedFile?.description ?? selectedFile?.typeLabel ?? "Ready")
+            : ""}
         </span>
       </div>
     </div>

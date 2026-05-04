@@ -75,7 +75,7 @@ export const projects: Project[] = [
     id: 4,
     title: "Portfolio",
     description:
-      "You're Here! This is a macOS-inspired personal portfolio website that presents my projects, background, and contact info through draggable desktop windows, Finder-style navigation, and custom UI interactions built for a polished and memorable browsing experience. Play around and have fun! Feel free to contact me if you have any questions. Yes, this was built while I was procasting.",
+      "You're Here! This is a macOS-inspired personal portfolio website that presents my projects, background, and contact info through draggable desktop windows, Finder-style navigation, and custom UI interactions built for a polished and memorable browsing experience. Play around and have fun! Feel free to contact me if you have any questions. Yes, this was built while I was procrastinating.",
     technologies: ["Next.js", "TypeScript", "Tailwind CSS", "Framer Motion"],
     githubUrl: "https://github.com/AidenBrown21/portfolio-website",
     projectImages: ["/portfoliologo.jpg"],
