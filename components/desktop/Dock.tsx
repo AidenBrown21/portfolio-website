@@ -142,6 +142,18 @@ export default function Dock({
       );
     }
 
+    if (id === "vscode") {
+      return (
+        <Image
+          src="/vscode.png"
+          alt="VS Code"
+          width={28}
+          height={28}
+          className="h-7 w-7 object-contain"
+        />
+      );
+    }
+
     return (
       <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" aria-hidden="true">
         <path

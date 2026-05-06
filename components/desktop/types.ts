@@ -7,6 +7,7 @@ export type BaseWindowId =
   | "contact"
   | "resume"
   | "youtube"
+  | "vscode"
   | "ai";
 export type ProjectWindowId = `project-${number}`;
 export type AppWindowId = BaseWindowId | ProjectWindowId;

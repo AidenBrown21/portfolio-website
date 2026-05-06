@@ -29,6 +29,7 @@ import ProjectWindowContent from "@/components/desktop/content/ProjectWindowCont
 import ResumeWindowContent from "@/components/desktop/content/ResumeWindowContent";
 import YouTubeWindowContent from "@/components/desktop/content/YouTubeWindowContent";
 import AiModelWindowContent from "@/components/desktop/content/AiModelWindowContent";
+import VsCodeWindowContent from "@/components/desktop/content/VsCodeWindowContent";
 
 const baseWindowConfigs: Record<BaseWindowId, BaseWindowConfig> = {
   finder: {
@@ -71,6 +72,11 @@ const baseWindowConfigs: Record<BaseWindowId, BaseWindowConfig> = {
     title: "YouTube",
     frame: { x: 72, y: 52, width: 900, height: 560 },
   },
+  vscode: {
+    id: "vscode",
+    title: "VS Code",
+    frame: { x: 96, y: 54, width: 940, height: 580 },
+  },
   ai: {
     id: "ai",
     title: "AI Model",
@@ -86,6 +92,7 @@ const dockItems: DockItem[] = [
   { id: "about", label: "About" },
   { id: "contact", label: "Contact" },
   { id: "youtube", label: "YouTube" },
+  { id: "vscode", label: "VS Code" },
 ];
 
 const WEEKDAY_SHORT = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"] as const;
@@ -161,6 +168,7 @@ export default function WindowManager() {
     contact: baseWindowConfigs.contact.frame,
     resume: baseWindowConfigs.resume.frame,
     youtube: baseWindowConfigs.youtube.frame,
+    vscode: baseWindowConfigs.vscode.frame,
     ai: baseWindowConfigs.ai.frame,
   });
   const [minimizedWindows, setMinimizedWindows] = useState<AppWindowId[]>([]);
@@ -331,6 +339,16 @@ export default function WindowManager() {
         target: { kind: "base-window", windowId: "contact" },
       },
       {
+        id: "desktop-vscode",
+        label: "VS Code",
+        typeLabel: "Application",
+        icon: "app",
+        description: "Read-only portfolio source viewer",
+        modifiedLabel: "Today",
+        sizeLabel: "6 KB",
+        target: { kind: "base-window", windowId: "vscode" },
+      },
+      {
         id: "desktop-ai-model",
         label: "AI Model",
         typeLabel: "Application",
@@ -415,6 +433,13 @@ export default function WindowManager() {
       return {
         previewUrl: null,
         previewText: "Search and watch videos",
+      };
+    }
+
+    if (windowId === "vscode") {
+      return {
+        previewUrl: null,
+        previewText: "Read-only portfolio code view",
       };
     }
 
@@ -773,6 +798,7 @@ export default function WindowManager() {
               onMinimize={() => minimizeWindow(windowId)}
               onToggleMaximize={() => toggleMaximizeWindow(windowId)}
               onMove={moveWindow}
+              contentPadding={windowId === "vscode" ? "none" : "default"}
             >
               {windowId === "home" && <HomeWindowContent />}
               {windowId === "photos" && (
@@ -801,6 +827,7 @@ export default function WindowManager() {
               {windowId === "contact" && <ContactWindowContent />}
               {windowId === "resume" && <ResumeWindowContent />}
               {windowId === "youtube" && <YouTubeWindowContent />}
+              {windowId === "vscode" && <VsCodeWindowContent />}
               {windowId === "ai" && <AiModelWindowContent />}
             </Window>
           );

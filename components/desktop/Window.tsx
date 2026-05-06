@@ -22,6 +22,7 @@ interface WindowProps {
   onMinimize: () => void;
   onToggleMaximize: () => void;
   onMove: (id: string, x: number, y: number) => void;
+  contentPadding?: "default" | "none";
   children: ReactNode;
 }
 
@@ -38,6 +39,7 @@ export default function Window({
   onMinimize,
   onToggleMaximize,
   onMove,
+  contentPadding = "default",
   children,
 }: WindowProps) {
   const dragStateRef = useRef<{
@@ -209,7 +211,13 @@ export default function Window({
           {title}
         </p>
       </header>
-      <div className="relative z-10 h-[calc(100%-44px)] overflow-auto p-6 md:p-8">{children}</div>
+      <div
+        className={`relative z-10 h-[calc(100%-44px)] overflow-auto ${
+          contentPadding === "none" ? "p-0" : "p-6 md:p-8"
+        }`}
+      >
+        {children}
+      </div>
     </section>
   );
 }
