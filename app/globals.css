@@ -498,3 +498,17 @@ button.menu-bar-item:focus-visible {
     width: 1rem;
   }
 }
+
+.ai-markdown p {
+  margin: 0;
+}
+
+.ai-markdown p + p {
+  margin-top: 0.55rem;
+}
+
+.ai-markdown .katex-display {
+  margin: 0.6rem 0;
+  overflow-x: auto;
+  overflow-y: hidden;
+}

@@ -6,7 +6,8 @@ export type BaseWindowId =
   | "projects"
   | "contact"
   | "resume"
-  | "youtube";
+  | "youtube"
+  | "ai";
 export type ProjectWindowId = `project-${number}`;
 export type AppWindowId = BaseWindowId | ProjectWindowId;
 

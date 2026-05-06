@@ -28,6 +28,7 @@ import PhotosWindowContent, {
 import ProjectWindowContent from "@/components/desktop/content/ProjectWindowContent";
 import ResumeWindowContent from "@/components/desktop/content/ResumeWindowContent";
 import YouTubeWindowContent from "@/components/desktop/content/YouTubeWindowContent";
+import AiModelWindowContent from "@/components/desktop/content/AiModelWindowContent";
 
 const baseWindowConfigs: Record<BaseWindowId, BaseWindowConfig> = {
   finder: {
@@ -69,6 +70,11 @@ const baseWindowConfigs: Record<BaseWindowId, BaseWindowConfig> = {
     id: "youtube",
     title: "YouTube",
     frame: { x: 72, y: 52, width: 900, height: 560 },
+  },
+  ai: {
+    id: "ai",
+    title: "AI Model",
+    frame: { x: 180, y: 82, width: 860, height: 560 },
   },
 };
 
@@ -155,6 +161,7 @@ export default function WindowManager() {
     contact: baseWindowConfigs.contact.frame,
     resume: baseWindowConfigs.resume.frame,
     youtube: baseWindowConfigs.youtube.frame,
+    ai: baseWindowConfigs.ai.frame,
   });
   const [minimizedWindows, setMinimizedWindows] = useState<AppWindowId[]>([]);
   const [minimizedDockEntries, setMinimizedDockEntries] = useState<MinimizedDockEntry[]>([]);
@@ -323,6 +330,16 @@ export default function WindowManager() {
         sizeLabel: "4 KB",
         target: { kind: "base-window", windowId: "contact" },
       },
+      {
+        id: "desktop-ai-model",
+        label: "AI Model",
+        typeLabel: "Application",
+        icon: "app",
+        description: "Private Purdue GenAI assistant",
+        modifiedLabel: "Today",
+        sizeLabel: "8 KB",
+        target: { kind: "base-window", windowId: "ai" },
+      },
       ...projectDesktopFiles,
     ],
     [projectDesktopFiles],
@@ -398,6 +415,13 @@ export default function WindowManager() {
       return {
         previewUrl: null,
         previewText: "Search and watch videos",
+      };
+    }
+
+    if (windowId === "ai") {
+      return {
+        previewUrl: null,
+        previewText: "Private Purdue GenAI assistant",
       };
     }
 
@@ -777,6 +801,7 @@ export default function WindowManager() {
               {windowId === "contact" && <ContactWindowContent />}
               {windowId === "resume" && <ResumeWindowContent />}
               {windowId === "youtube" && <YouTubeWindowContent />}
+              {windowId === "ai" && <AiModelWindowContent />}
             </Window>
           );
         })}

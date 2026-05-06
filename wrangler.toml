@@ -1,6 +1,9 @@
 name = "portfolio"
 compatibility_date = "2024-01-01"
 
+[vars]
+PURDUE_GENAI_MODEL = "llama4:latest"
+
 # Do not set `pages_build_output_dir` here if you use Cloudflare Pages **Settings**
 # for build command (`npm run build`) and output directory (`out`). When both exist,
 # some projects fail to pass **dashboard** environment variables into `next build`,
@@ -9,6 +12,18 @@ compatibility_date = "2024-01-01"
 # For local CLI deploys: `npx wrangler pages deploy ./out --project-name=portfolio`
 # (or your project name). See: https://developers.cloudflare.com/workers/wrangler/commands/#pages-deploy
 #
-# YouTube search (`functions/api/youtube-search.ts`): set YOUTUBE_API_KEY in Pages → Settings →
-# Variables (secret). For local Pages Functions: put YOUTUBE_API_KEY in `.dev.vars`, then
+# Required Pages Function runtime variables:
+# - Secret: YOUTUBE_API_KEY
+# - Secret: AI_APP_ACCESS_PASSWORD
+# - Secret: PURDUE_GENAI_API_KEY
+# - Variable or secret: PURDUE_GENAI_BASE_URL
+# - Variable: PURDUE_GENAI_MODEL (defaulted above)
+#
+# Set production secrets with Wrangler:
+# - `npx wrangler pages secret put YOUTUBE_API_KEY --project-name=portfolio`
+# - `npx wrangler pages secret put AI_APP_ACCESS_PASSWORD --project-name=portfolio`
+# - `npx wrangler pages secret put PURDUE_GENAI_API_KEY --project-name=portfolio`
+# - `npx wrangler pages secret put PURDUE_GENAI_BASE_URL --project-name=portfolio` (optional if set in dashboard vars)
+#
+# For local Pages Functions: put these keys in `.dev.vars`, then run:
 # `npm run build && npx wrangler pages dev ./out`.
