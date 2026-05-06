@@ -61,6 +61,15 @@ npx wrangler pages dev ./out
 
 Then test API endpoints through the Wrangler-served URL.
 
+## Desktop Weather Widget
+
+The desktop weather card now fetches live data:
+- It first requests browser geolocation in the frontend.
+- If location permission is denied/unavailable (or current-location lookup fails), it falls back to West Lafayette coordinates.
+- The client calls Open-Meteo directly from the browser for forecast data.
+
+Open-Meteo currently does not require an API key for this usage, so no additional weather secret is needed.
+
 ## Learn More
 
 To learn more about Next.js, take a look at the following resources:

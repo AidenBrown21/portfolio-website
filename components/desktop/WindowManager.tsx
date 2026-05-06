@@ -514,7 +514,7 @@ export default function WindowManager() {
   };
 
   const openFeaturedPhoto = () => {
-    setSelectedPhotoId("library-aiden");
+    setSelectedPhotoId("library-sigma-nu");
     openBaseWindow("photos");
   };
 
