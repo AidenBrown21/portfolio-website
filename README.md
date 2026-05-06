@@ -33,7 +33,7 @@ cp .env.example .env.local
 ```
 
 Required values:
-- `AI_APP_ACCESS_PASSWORD` (requested default: `210345`)
+- `AI_APP_ACCESS_PASSWORD` 
 - `PURDUE_GENAI_API_KEY`
 - `PURDUE_GENAI_MODEL` (default: `llama4:latest`)
 - `PURDUE_GENAI_BASE_URL` (base URL or full `/chat/completions` URL)
