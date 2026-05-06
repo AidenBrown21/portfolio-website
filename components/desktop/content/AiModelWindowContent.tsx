@@ -1,6 +1,14 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState, type ChangeEvent, type FormEvent } from "react";
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type ChangeEvent,
+  type FormEvent,
+} from "react";
 import ReactMarkdown from "react-markdown";
 import rehypeKatex from "rehype-katex";
 import remarkMath from "remark-math";
@@ -30,6 +38,13 @@ type UnlockResponse = {
 const SESSION_UNLOCK_KEY = "aiModelUnlocked";
 const MAX_UPLOAD_BYTES = 5 * 1024 * 1024;
 const MAX_CONTEXT_TURNS = 20;
+const STREAM_DONE = "[DONE]";
+const QUICK_PROMPTS = [
+  "Summarize this for me",
+  "Write anything",
+  "Help me learn",
+  "Plan my day",
+] as const;
 
 const fileToDataUrl = (file: File) =>
   new Promise<string>((resolve, reject) => {
@@ -57,6 +72,17 @@ export default function AiModelWindowContent() {
   const [imagePreviewUrl, setImagePreviewUrl] = useState<string | null>(null);
   const [chatError, setChatError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [isAttachMenuOpen, setIsAttachMenuOpen] = useState(false);
+  const messageListRef = useRef<HTMLDivElement | null>(null);
+  const promptInputRef = useRef<HTMLInputElement | null>(null);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
+
+  useEffect(() => {
+    messageListRef.current?.scrollTo({
+      top: messageListRef.current.scrollHeight,
+      behavior: "smooth",
+    });
+  }, [messages, loading]);
 
   useEffect(() => {
     if (window.sessionStorage.getItem(SESSION_UNLOCK_KEY) === "true") {
@@ -162,7 +188,12 @@ export default function AiModelWindowContent() {
         text: promptText || "(Image question)",
         imagePreviewUrl: imagePreviewUrl ?? undefined,
       };
-      setMessages((previous) => [...previous, userMessage]);
+      const assistantMessageId = `assistant-${Date.now()}`;
+      setMessages((previous) => [
+        ...previous,
+        userMessage,
+        { id: assistantMessageId, role: "assistant", text: "" },
+      ]);
       setPrompt("");
 
       try {
@@ -174,27 +205,108 @@ export default function AiModelWindowContent() {
             prompt: promptText,
             imageDataUrl,
             history,
+            stream: true,
           }),
         });
 
-        const data = (await response.json().catch(() => ({}))) as AiChatResponse;
         if (!response.ok) {
+          const data = (await response.json().catch(() => ({}))) as AiChatResponse;
           setChatError(data.message ?? "AI request failed.");
+          setMessages((previous) =>
+            previous.filter((message) => message.id !== assistantMessageId),
+          );
           return;
         }
 
-        setMessages((previous) => [
-          ...previous,
-          {
-            id: `assistant-${Date.now()}`,
-            role: "assistant",
-            text: data.answer ?? "No response returned.",
-          },
-        ]);
+        const contentType = response.headers.get("content-type") ?? "";
+        if (contentType.includes("text/event-stream")) {
+          const reader = response.body?.getReader();
+          if (!reader) {
+            throw new Error("Missing stream body");
+          }
+
+          const decoder = new TextDecoder();
+          let buffer = "";
+          let finalText = "";
+          let done = false;
+
+          while (!done) {
+            const chunk = await reader.read();
+            done = chunk.done;
+            buffer += decoder.decode(chunk.value ?? new Uint8Array(), { stream: !done });
+
+            const events = buffer.split("\n\n");
+            buffer = events.pop() ?? "";
+
+            for (const eventBlock of events) {
+              const dataLines = eventBlock
+                .split("\n")
+                .filter((line) => line.startsWith("data:"))
+                .map((line) => line.replace(/^data:\s?/, "").trim());
+
+              for (const payload of dataLines) {
+                if (!payload) continue;
+                if (payload === STREAM_DONE) {
+                  continue;
+                }
+
+                try {
+                  const parsed = JSON.parse(payload) as {
+                    type?: "delta" | "done" | "error";
+                    delta?: string;
+                    message?: string;
+                  };
+
+                  if (parsed.type === "delta" && parsed.delta) {
+                    finalText += parsed.delta;
+                    setMessages((previous) =>
+                      previous.map((message) =>
+                        message.id === assistantMessageId
+                          ? { ...message, text: finalText }
+                          : message,
+                      ),
+                    );
+                  }
+
+                  if (parsed.type === "error") {
+                    throw new Error(parsed.message ?? "Streaming failed.");
+                  }
+                } catch {
+                  // Ignore malformed stream chunks and continue parsing.
+                }
+              }
+            }
+          }
+
+          setMessages((previous) =>
+            previous.map((message) =>
+              message.id === assistantMessageId
+                ? {
+                    ...message,
+                    text: message.text.trim() || "No response returned.",
+                  }
+                : message,
+            ),
+          );
+          return;
+        }
+
+        const data = (await response.json().catch(() => ({}))) as AiChatResponse;
+        setMessages((previous) =>
+          previous.map((message) =>
+            message.id === assistantMessageId
+              ? { ...message, text: data.answer ?? "No response returned." }
+              : message,
+          ),
+        );
       } catch {
         setChatError("Could not reach the AI service.");
+        setMessages((previous) =>
+          previous.filter((message) => message.id !== assistantMessageId),
+        );
       } finally {
         setLoading(false);
+        setIsAttachMenuOpen(false);
         resetImage();
       }
     },
@@ -240,105 +352,170 @@ export default function AiModelWindowContent() {
   }
 
   return (
-    <div className="-m-6 flex h-[calc(100%+3rem)] flex-col overflow-hidden bg-[#f8fafc] md:-m-8 md:h-[calc(100%+4rem)]">
-      <header className="flex items-center justify-between border-b border-black/10 bg-white px-4 py-3">
-        <p className="text-sm font-semibold text-black">Model: llama4:latest</p>
+    <div className="-m-6 flex h-[calc(100%+3rem)] overflow-hidden bg-[#eef3fb] md:-m-8 md:h-[calc(100%+4rem)]">
+      <aside className="hidden w-14 shrink-0 border-r border-black/10 bg-white/65 backdrop-blur md:flex md:flex-col md:items-center md:justify-between md:py-3">
         <button
           type="button"
-          onClick={() => setMessages([])}
-          className="rounded-md border border-black/15 px-2.5 py-1.5 text-xs font-medium text-black hover:bg-black/5"
+          className="rounded-xl border border-black/10 bg-white/70 p-2 text-black/65 hover:bg-white"
+          aria-label="Menu"
         >
-          Clear chat
+          ≡
         </button>
-      </header>
+        <button
+          type="button"
+          className="rounded-xl border border-black/10 bg-white/70 p-2 text-black/65 hover:bg-white"
+          aria-label="Settings"
+        >
+          ⚙
+        </button>
+      </aside>
 
-      <main className="min-h-0 flex-1 overflow-y-auto p-4">
-        {messages.length === 0 ? (
-          <div className="rounded-xl border border-dashed border-black/20 bg-white p-5 text-sm text-black/60">
-            Ask a question or upload an image for the model to analyze.
-          </div>
-        ) : (
-          <ul className="space-y-3">
-            {messages.map((message) => (
-              <li
-                key={message.id}
-                className={`max-w-[90%] rounded-xl border px-3 py-2 text-sm ${
-                  message.role === "user"
-                    ? "ml-auto border-[#cddbfd] bg-[#e9f0ff] text-[#0f172a]"
-                    : "border-black/10 bg-white text-black"
-                }`}
-              >
-                {message.role === "assistant" && (
-                  <p className="mb-1 text-[11px] font-semibold uppercase tracking-[0.08em] text-black/45">
-                    assistant
-                  </p>
-                )}
-                <div className="ai-markdown text-sm leading-relaxed">
-                  <ReactMarkdown remarkPlugins={[remarkMath]} rehypePlugins={[rehypeKatex]}>
-                    {message.text}
-                  </ReactMarkdown>
-                </div>
-                {message.imagePreviewUrl && (
-                  <img
-                    src={message.imagePreviewUrl}
-                    alt="Uploaded context"
-                    className="mt-2 max-h-40 w-auto rounded-lg border border-black/10 object-contain"
-                  />
-                )}
-              </li>
-            ))}
-            {loading && (
-              <li className="max-w-[90%] rounded-xl border border-black/10 bg-white px-3 py-2 text-sm text-black">
-                <p className="mb-1 text-[11px] font-semibold uppercase tracking-[0.08em] text-black/45">
-                  assistant
-                </p>
-                <p className="text-sm text-black/70">Thinking...</p>
-              </li>
-            )}
-          </ul>
-        )}
-      </main>
-
-      <form onSubmit={sendPrompt} className="border-t border-black/10 bg-white p-3">
-        <div className="mb-2 flex items-center gap-2">
-          <input
-            type="file"
-            accept="image/*"
-            onChange={onImageChange}
-            className="max-w-[220px] text-xs text-black/70 file:mr-2 file:rounded-md file:border-0 file:bg-[#f0f2f6] file:px-2.5 file:py-1.5 file:text-xs file:font-medium file:text-black"
-          />
-          {imagePreviewUrl && (
-            <button
-              type="button"
-              onClick={resetImage}
-              className="rounded-md border border-black/15 px-2 py-1 text-xs hover:bg-black/5"
-            >
-              Remove image
-            </button>
-          )}
-        </div>
-        <div className="flex gap-2">
-          <label htmlFor="ai-prompt" className="sr-only">
-            Ask AI model
-          </label>
-          <input
-            id="ai-prompt"
-            type="text"
-            value={prompt}
-            onChange={(event) => setPrompt(event.target.value)}
-            placeholder="Ask anything..."
-            className="min-w-0 flex-1 rounded-lg border border-black/20 px-3 py-2 text-sm outline-none ring-black/20 focus:ring-2"
-          />
+      <div className="flex min-w-0 flex-1 flex-col">
+        <header className="flex items-center justify-between border-b border-black/10 bg-white/70 px-4 py-3 backdrop-blur">
+          <p className="text-sm font-semibold text-black/70">AI Model</p>
           <button
-            type="submit"
-            disabled={!canSubmit}
-            className="rounded-lg bg-black px-4 py-2 text-sm font-medium text-white disabled:cursor-not-allowed disabled:opacity-65"
+            type="button"
+            onClick={() => setMessages([])}
+            className="rounded-full border border-black/15 bg-white/70 px-3 py-1.5 text-xs font-medium text-black/80 hover:bg-white"
           >
-            {loading ? "Sending..." : "Send"}
+            Clear chat
           </button>
-        </div>
-        {chatError && <p className="mt-2 text-xs text-[#b42339]">{chatError}</p>}
-      </form>
+        </header>
+
+        <main ref={messageListRef} className="min-h-0 flex-1 overflow-y-auto px-4 py-6">
+          <div className="mx-auto flex min-h-full w-full max-w-4xl flex-col">
+            {messages.length === 0 ? (
+              <div className="flex flex-1 flex-col items-center justify-center px-4 text-center">
+                <p className="text-sm font-medium text-black/55">Hi there</p>
+                <h2 className="mt-1 text-4xl font-medium tracking-tight text-black/80">
+                  Where should we start?
+                </h2>
+              </div>
+            ) : (
+              <ul className="mx-auto flex w-full max-w-3xl flex-col gap-3 pb-24">
+                {messages.map((message) => (
+                  <li
+                    key={message.id}
+                  className={`ai-chat-bubble max-w-[92%] border px-4 py-3 text-sm shadow-[0_6px_24px_rgba(22,28,45,0.08)] ${
+                      message.role === "user"
+                      ? "ai-chat-bubble-user ml-auto border-[#c8d8fb] bg-[#e8f0ff]"
+                        : "border-white/70 bg-white/80 backdrop-blur"
+                    }`}
+                  >
+                    {message.role === "assistant" && (
+                      <p className="mb-1 text-[11px] font-semibold uppercase tracking-[0.08em] text-black/45">
+                        assistant
+                      </p>
+                    )}
+                    <div className="ai-markdown text-sm leading-relaxed text-black/85">
+                      <ReactMarkdown remarkPlugins={[remarkMath]} rehypePlugins={[rehypeKatex]}>
+                        {message.text || "Thinking..."}
+                      </ReactMarkdown>
+                    </div>
+                    {message.imagePreviewUrl && (
+                      <img
+                        src={message.imagePreviewUrl}
+                        alt="Uploaded context"
+                        className="mt-3 max-h-44 w-auto rounded-2xl border border-black/10 object-contain"
+                      />
+                    )}
+                  </li>
+                ))}
+              </ul>
+            )}
+
+            <form onSubmit={sendPrompt} className="sticky bottom-0 z-10 mt-3 pb-2">
+              <div className="ai-glass-panel mx-auto max-w-3xl p-3">
+                <label htmlFor="ai-prompt" className="sr-only">
+                  Ask AI model
+                </label>
+                <input
+                  ref={promptInputRef}
+                  id="ai-prompt"
+                  type="text"
+                  value={prompt}
+                  onChange={(event) => setPrompt(event.target.value)}
+                  placeholder="Ask AI Model"
+                  className="ai-glass-input w-full border-none bg-transparent px-2 py-1.5 text-sm text-black/90 outline-none placeholder:text-black/40 focus:ring-0"
+                />
+
+                <div className="mt-2 flex items-center justify-between gap-2">
+                  <div className="relative flex items-center gap-2">
+                    <input
+                      ref={fileInputRef}
+                      type="file"
+                      accept="image/*"
+                      onChange={onImageChange}
+                      className="hidden"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setIsAttachMenuOpen((previous) => !previous)}
+                      className="ai-glass-chip inline-flex h-8 w-8 items-center justify-center text-lg leading-none text-black/75"
+                      aria-label="Open attachment options"
+                    >
+                      +
+                    </button>
+                    {isAttachMenuOpen && (
+                      <div className="ai-glass-menu absolute bottom-11 left-0 min-w-[140px] p-1.5">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setIsAttachMenuOpen(false);
+                            fileInputRef.current?.click();
+                          }}
+                          className="w-full rounded-xl px-3 py-2 text-left text-xs font-medium text-black/80 hover:bg-black/5"
+                        >
+                          Upload image
+                        </button>
+                      </div>
+                    )}
+                    {imagePreviewUrl && (
+                      <button
+                        type="button"
+                        onClick={resetImage}
+                        className="ai-glass-chip px-2.5 py-1 text-xs text-black/70"
+                      >
+                        Remove image
+                      </button>
+                    )}
+                  </div>
+                  <button
+                    type="submit"
+                    disabled={!canSubmit}
+                    className="ai-glass-send px-4 py-2 text-sm font-medium text-black/85 disabled:cursor-not-allowed disabled:opacity-65"
+                  >
+                    {loading ? "Sending..." : "Send"}
+                  </button>
+                </div>
+              </div>
+
+              {messages.length === 0 && (
+                <div className="mx-auto mt-3 flex max-w-3xl flex-wrap justify-center gap-2">
+                  {QUICK_PROMPTS.map((quickPrompt) => (
+                    <button
+                      key={quickPrompt}
+                      type="button"
+                      onClick={() => {
+                        setPrompt(quickPrompt);
+                        setIsAttachMenuOpen(false);
+                        promptInputRef.current?.focus();
+                      }}
+                      className="ai-glass-chip px-3 py-1.5 text-xs font-medium text-black/70"
+                    >
+                      {quickPrompt}
+                    </button>
+                  ))}
+                </div>
+              )}
+
+              {chatError && (
+                <p className="mx-auto mt-2 max-w-3xl text-xs text-[#b42339]">{chatError}</p>
+              )}
+            </form>
+          </div>
+        </main>
+      </div>
     </div>
   );
 }
